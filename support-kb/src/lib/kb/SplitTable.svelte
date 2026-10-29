@@ -20,8 +20,8 @@
 <p class="sum">
   <strong>{split.merged.length}</strong> reports merged into #{ticket}
   ({split.rows - split.merged.length} rows in the export are repeats of the same id) ·
-  <strong>{split.groups.length}</strong>
-  {split.groups.length === 1 ? 'problem' : 'problems'}
+  <strong>{split.problems.length}</strong>
+  {split.problems.length === 1 ? 'problem' : 'problems'}
 </p>
 
 <table>
@@ -29,14 +29,14 @@
     <tr><th>problem</th><th>reports</th><th>tagged at intake as</th><th>tenants</th><th>seen</th><th>ticket</th></tr>
   </thead>
   <tbody>
-    {#each split.groups as g (g.problem)}
-      <tr>
-        <td><code>{g.problem}</code></td>
-        <td><strong>{g.reports.length}</strong></td>
-        <td class="tags">{tags(g.taggedAs)}</td>
-        <td>{g.tenants}</td>
-        <td>{g.firstSeen} → {g.lastSeen}</td>
-        <td>{#if tickets[g.problem]}<a href={tickets[g.problem]}>{label(tickets[g.problem]!)}</a>{:else}none{/if}</td>
+    {#each split.problems as p (p.problem)}
+      <tr class:read={p.filedUnder}>
+        <td><code>{p.problem}</code></td>
+        <td><strong>{p.reports.length}</strong>{#if p.filedUnder}<br /><small>counted under <code>{p.filedUnder}</code></small>{/if}</td>
+        <td class="tags">{tags(p.taggedAs)}</td>
+        <td>{p.tenants}</td>
+        <td>{p.firstSeen} → {p.lastSeen}</td>
+        <td>{#if tickets[p.problem]}<a href={tickets[p.problem]}>{label(tickets[p.problem]!)}</a>{:else}none{/if}</td>
       </tr>
     {/each}
   </tbody>
@@ -45,4 +45,6 @@
 <style>
   .sum { font-size: 1.1rem; }
   .tags { color: var(--muted); font-size: 0.85em; }
+  .read td { color: var(--muted); }
+  small { font-size: 0.8em; }
 </style>

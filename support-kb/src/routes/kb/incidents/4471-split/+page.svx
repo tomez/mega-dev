@@ -25,7 +25,7 @@ subject line says only that a date is wrong. Read by tenant, form and what the b
 ticket holds three problems. Each now has a ticket of its own.
 
 <Callout kind="warn">
-The queued parser fix closes only the first row below. The other two stay open after it ships.
+The queued parser fix closes only `parser`. `hint` and `one-day` stay open after it ships.
 </Callout>
 
 ## What #4471 holds
@@ -33,6 +33,8 @@ The queued parser fix closes only the first row below. The other two stay open a
 <SplitTable ticket={4471} {tickets} />
 
 Counts are per report id: the export comes in overlapping pages, so some reports appear twice.
+They are counted the desk's way (`causes.ts`): every report under the cause it is filed by. The
+`one-day` reports stay counted under `parser`, where they are filed, and get their own ticket.
 The intake tag is a guess from the reporter's browser and does not match the cause; the
 tenant's locale and booking form decide it (`causes.ts`, `locales.ts`).
 
@@ -58,8 +60,8 @@ These reports show no swap. The date lands one day early or late: 12 May shows a
 (R-41202), only June bookings are off by a day (R-41209), the invite comes before the booking
 (R-41236), Lisbon gets Tuesday and Toronto gets Monday for the same meeting (R-41344), Tuesday 6
 October shows as Monday (R-41620). That points at time zones or summer time, not at date order.
-The desk read them this way (`desk-notes.json`); the old table filed them under `parser` by
-tenant.
+The desk read them this way (`desk-notes.json`) and files them under `parser` by tenant, so the
+parser fix will be expected to close them. It will not.
 
 ## Lessons
 
