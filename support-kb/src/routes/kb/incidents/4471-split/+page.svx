@@ -19,14 +19,24 @@ signature: v1.eyJzdWIiOiIzNzI1IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYX
   };
 </script>
 
-[#4471](/kb/incidents/4471) is marked known: one bug, one fix queued. It is not one bug. Its reports
-were merged on the subject line ([decision 0001](/kb/decisions/0001-dedupe-by-subject)), and a
-subject line says only that a date is wrong. Read by tenant, form and what the body shows, the
-ticket holds three problems. Each now has a ticket of its own.
+[#4471](/kb/incidents/4471) was marked known: one bug, one fix queued. It was not one bug. Its
+reports were merged on the subject line ([decision 0001](/kb/decisions/0001-dedupe-by-subject)),
+and a subject line says only that a date is wrong. Read by tenant, form and what the body shows,
+the ticket holds three problems. Each has a ticket of its own.
 
 <Callout kind="warn">
-The queued parser fix closes only `parser`. `hint` and `one-day` stay open after it ships.
+#4471 closed on 5 October with the parser fix. That settled two of its three problems. The
+one-day moves have no fix and are still open: ticket #3.
 </Callout>
+
+## Where each problem stands
+
+Engineering update on #4471, closed 5 October:
+
+- `parser`: **fixed** by `fix(dates): parse dd/mm for eu locales`. Ticket #1 closed.
+- `hint`: **won't fix**, the `booking-v3` form is retired. Ticket #2 closed as not planned.
+- `one-day`: **open**. The update does not mention it, and the parser fix cannot fix it: these
+  dates move by a day, they do not swap. Ticket #3 stays open.
 
 ## What #4471 holds
 
@@ -44,15 +54,15 @@ tenant's locale and booking form decide it (`causes.ts`, `locales.ts`).
 
 Every tenant in #4471 writes dates day first. The shared parser reads them month first, so day
 and month swap: 7 April becomes 4 July (R-41200). It hits every tenant, through the app, email
-and the `booking-v2` form. This is the fix that is queued.
+and the `booking-v2` form. Fixed on 5 October.
 
 ### `hint`: booking-v3 tells people to type month first
 
 The `booking-v3` form prints `MM/DD/YYYY` under its date field, then reads the date the
 tenant's way, day first. People type what the hint says, so the date swaps before the parser
 sees it (R-41241, R-41305, R-41387). Only reports through the form of a `booking-v3` tenant
-(Alder Physio, Copper Studio, Pale Harbour). The parser fix does not touch it: change the
-hint, or read the form month first.
+(Alder Physio, Copper Studio, Pale Harbour). The parser fix did not touch it; retiring
+`booking-v3` ends it.
 
 ### `one-day`: the date moves by one day, not by a swap
 
@@ -61,12 +71,13 @@ These reports show no swap. The date lands one day early or late: 12 May shows a
 (R-41236), Lisbon gets Tuesday and Toronto gets Monday for the same meeting (R-41344), Tuesday 6
 October shows as Monday (R-41620). That points at time zones or summer time, not at date order.
 The desk read them this way (`desk-notes.json`) and files them under `parser` by tenant, so the
-parser fix will be expected to close them. It will not.
+parser fix was taken to close them. It did not.
 
 ## Lessons
 
 - A subject line tells you a date is wrong, not why. Split by cause before you count.
 - Count report ids, not rows.
 - An intake tag is a guess. Check it against the tenant before you trust it.
+- A ticket closes when its fix ships. Check that the fix covers every problem merged into it.
 
 <RenderStamp {signature} />
