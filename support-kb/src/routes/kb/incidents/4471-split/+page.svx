@@ -1,0 +1,70 @@
+---
+layout: runbook
+title: '#4471 split: three problems, not one'
+owner: tomasz ziarko
+status: open
+reviewed: 2026-10-29
+signature: v1.eyJzdWIiOiIzNzI1IiwiYXVkIjoiY2hhbGxlbmdlOndoYXQtaXQtc2hvd3MiLCJpYXQiOjE3OTMyODcwNjEsImV4cCI6MTc5MzM3MzQ2MX0.TP8P7ueM2xmwDEWUplRxqYIpwsN8oKfgBfJE_Ii05s0
+---
+
+<script>
+  import SplitTable from '#lib/kb/SplitTable.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+
+  const tickets = {
+    parser: 'https://github.com/tomez/mega-dev/issues/1',
+    hint: 'https://github.com/tomez/mega-dev/issues/2',
+    'one-day': 'https://github.com/tomez/mega-dev/issues/3',
+  };
+</script>
+
+[#4471](/kb/incidents/4471) is marked known: one bug, one fix queued. It is not one bug. Its reports
+were merged on the subject line ([decision 0001](/kb/decisions/0001-dedupe-by-subject)), and a
+subject line says only that a date is wrong. Read by tenant, form and what the body shows, the
+ticket holds three problems. Each now has a ticket of its own.
+
+<Callout kind="warn">
+The queued parser fix closes only the first row below. The other two stay open after it ships.
+</Callout>
+
+## What #4471 holds
+
+<SplitTable ticket={4471} {tickets} />
+
+Counts are per report id: the export comes in overlapping pages, so some reports appear twice.
+The intake tag is a guess from the reporter's browser and does not match the cause; the
+tenant's locale and booking form decide it (`causes.ts`, `locales.ts`).
+
+## The three problems
+
+### `parser`: the shared parser reads every date month first
+
+Every tenant in #4471 writes dates day first. The shared parser reads them month first, so day
+and month swap: 7 April becomes 4 July (R-41200). It hits every tenant, through the app, email
+and the `booking-v2` form. This is the fix that is queued.
+
+### `hint`: booking-v3 tells people to type month first
+
+The `booking-v3` form prints `MM/DD/YYYY` under its date field, then reads the date the
+tenant's way, day first. People type what the hint says, so the date swaps before the parser
+sees it (R-41241, R-41305, R-41387). Only reports through the form of a `booking-v3` tenant
+(Alder Physio, Copper Studio, Pale Harbour). The parser fix does not touch it: change the
+hint, or read the form month first.
+
+### `one-day`: the date moves by one day, not by a swap
+
+These reports show no swap. The date lands one day early or late: 12 May shows as 11 May
+(R-41202), only June bookings are off by a day (R-41209), the invite comes before the booking
+(R-41236), Lisbon gets Tuesday and Toronto gets Monday for the same meeting (R-41344), Tuesday 6
+October shows as Monday (R-41620). That points at time zones or summer time, not at date order.
+The desk read them this way (`desk-notes.json`); the old table filed them under `parser` by
+tenant.
+
+## Lessons
+
+- A subject line tells you a date is wrong, not why. Split by cause before you count.
+- Count report ids, not rows.
+- An intake tag is a guess. Check it against the tenant before you trust it.
+
+<RenderStamp {signature} />
